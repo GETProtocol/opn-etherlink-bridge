@@ -1,16 +1,26 @@
 import "@nomicfoundation/hardhat-toolbox";
+import * as dotenv from "dotenv";
 import "hardhat-deploy";
 import type { HardhatUserConfig } from "hardhat/config";
-import { vars } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 
 import "./tasks/accounts";
+import "./tasks/deployOFTAdapter";
 import "./tasks/lock";
 
-// Run 'npx hardhat vars setup' to see the list of variables that need to be set
+// Load environment variables from .env file
+dotenv.config();
 
-const mnemonic: string = vars.get("MNEMONIC");
-const infuraApiKey: string = vars.get("INFURA_API_KEY");
+// Check for required environment variables
+const MNEMONIC = process.env.MNEMONIC;
+if (!MNEMONIC) {
+  throw new Error("Please set your MNEMONIC in a .env file");
+}
+
+const INFURA_API_KEY = process.env.INFURA_API_KEY || "";
+if (!INFURA_API_KEY) {
+  console.warn("Warning: INFURA_API_KEY not set in .env file");
+}
 
 const chainIds = {
   "arbitrum-mainnet": 42161,
@@ -35,12 +45,12 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
     default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
+      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + INFURA_API_KEY;
   }
   return {
     accounts: {
       count: 10,
-      mnemonic,
+      mnemonic: MNEMONIC,
       path: "m/44'/60'/0'/0",
     },
     chainId: chainIds[chain],
@@ -55,14 +65,14 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      arbitrumOne: vars.get("ARBISCAN_API_KEY", ""),
-      avalanche: vars.get("SNOWTRACE_API_KEY", ""),
-      bsc: vars.get("BSCSCAN_API_KEY", ""),
-      mainnet: vars.get("ETHERSCAN_API_KEY", ""),
-      optimisticEthereum: vars.get("OPTIMISM_API_KEY", ""),
-      polygon: vars.get("POLYGONSCAN_API_KEY", ""),
-      polygonMumbai: vars.get("POLYGONSCAN_API_KEY", ""),
-      sepolia: vars.get("ETHERSCAN_API_KEY", ""),
+      arbitrumOne: process.env.ARBISCAN_API_KEY || "",
+      avalanche: process.env.SNOWTRACE_API_KEY || "",
+      bsc: process.env.BSCSCAN_API_KEY || "",
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+      optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
+      polygon: process.env.POLYGONSCAN_API_KEY || "",
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
     },
   },
   gasReporter: {
@@ -74,13 +84,13 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       accounts: {
-        mnemonic,
+        mnemonic: MNEMONIC,
       },
       chainId: chainIds.hardhat,
     },
     ganache: {
       accounts: {
-        mnemonic,
+        mnemonic: MNEMONIC,
       },
       chainId: chainIds.ganache,
       url: "http://localhost:8545",
