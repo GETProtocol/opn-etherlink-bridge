@@ -4,6 +4,11 @@ export const LZ_ENDPOINTS = {
   ETHERLINK: "0xec28645346D781674B4272706D8a938dB2BAA2C6",
 } as const;
 
+export const LZ_EID = {
+  SEPOLIA: 40161,
+  ETHERLINK: 40239,
+} as const;
+
 // Chain IDs for LayerZero
 export const LZ_CHAIN_IDS = {
   SEPOLIA: 40161,

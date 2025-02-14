@@ -9,6 +9,8 @@ import "./tasks/deployOFT";
 import "./tasks/deployOFTAdapter";
 import "./tasks/deployToken";
 import "./tasks/lock";
+import "./tasks/setOFTAdapterPeer";
+import "./tasks/setOFTPeer";
 import "./tasks/verify";
 
 // Load environment variables from .env file
