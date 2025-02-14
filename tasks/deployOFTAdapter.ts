@@ -1,12 +1,14 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
+import { getLzEndpoint } from "../constants";
+
 task("deploy-oft-adapter", "Deploys the OFTAdapter contract")
   .addParam("token", "The ERC20 token address")
-  .addParam("endpoint", "The LayerZero endpoint address")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
-      const { token, endpoint } = taskArgs;
+      const { token } = taskArgs;
+      const endpoint = getLzEndpoint(hre.network.name);
 
       // Get the deployer account
       const [deployer] = await hre.ethers.getSigners();

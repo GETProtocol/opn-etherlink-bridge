@@ -5,8 +5,11 @@ import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 
 import "./tasks/accounts";
+import "./tasks/deployOFT";
 import "./tasks/deployOFTAdapter";
+import "./tasks/deployToken";
 import "./tasks/lock";
+import "./tasks/verify";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -33,6 +36,7 @@ const chainIds = {
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
   sepolia: 11155111,
+  etherlink: 128123,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
@@ -43,6 +47,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
     case "bsc":
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
+      break;
+    case "etherlink":
+      jsonRpcUrl = "https://node.ghostnet.etherlink.com";
       break;
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + INFURA_API_KEY;
@@ -73,7 +80,26 @@ const config: HardhatUserConfig = {
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       sepolia: process.env.ETHERSCAN_API_KEY || "",
+      "etherlink-testnet": process.env.ETHERLINK_API_KEY || "",
     },
+    customChains: [
+      {
+        network: "polygonAmoy",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://amoy.polygonscan.com/",
+        },
+      },
+      {
+        network: "etherlink-testnet",
+        chainId: 128123,
+        urls: {
+          apiURL: "https://testnet.explorer.etherlink.com/api",
+          browserURL: "https://testnet.explorer.etherlink.com",
+        },
+      },
+    ],
   },
   gasReporter: {
     currency: "USD",
@@ -103,6 +129,7 @@ const config: HardhatUserConfig = {
     "polygon-mainnet": getChainConfig("polygon-mainnet"),
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
     sepolia: getChainConfig("sepolia"),
+    etherlink: getChainConfig("etherlink"),
   },
   paths: {
     artifacts: "./artifacts",
@@ -111,7 +138,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.19",
+    version: "0.8.20",
     settings: {
       metadata: {
         // Not including the metadata hash
@@ -126,6 +153,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
+
   typechain: {
     outDir: "types",
     target: "ethers-v6",
