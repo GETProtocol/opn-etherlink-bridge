@@ -4,6 +4,7 @@ import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { NETWORK_NAMES, getLzChainId } from "../constants";
+import { MyOFT } from "../types/contracts/MyOFT";
 
 interface ContractsJson {
   oft?: string;
@@ -42,8 +43,7 @@ task("set-oft-peer", "Sets peer for OFT contract").setAction(async (_, hre: Hard
     console.log("Setting OFT peer with account:", deployer.address);
 
     // Get contract instance
-    const MyOFT = await hre.ethers.getContractFactory("MyOFT");
-    const oft = MyOFT.attach(etherlinkContracts.oft);
+    const oft = (await hre.ethers.getContractAt("MyOFT", etherlinkContracts.oft)) as MyOFT;
 
     // Get Sepolia's EID
     const sepoliaEid = getLzChainId(NETWORK_NAMES.SEPOLIA);
@@ -58,7 +58,7 @@ task("set-oft-peer", "Sets peer for OFT contract").setAction(async (_, hre: Hard
     const receipt = await tx.wait();
 
     console.log("\nPeer setup completed successfully");
-    console.log("Transaction hash:", receipt.hash);
+    console.log("Transaction hash:", receipt?.hash);
 
     console.log("\nIMPORTANT: Make sure to also run set-oftadapter-peer on Sepolia network");
     console.log("npx hardhat set-oftadapter-peer --network sepolia");

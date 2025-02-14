@@ -4,6 +4,7 @@ import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { NETWORK_NAMES, getLzChainId } from "../constants";
+import { MyOFTAdapter } from "../types";
 
 interface ContractsJson {
   oft?: string;
@@ -43,8 +44,7 @@ task("set-oftadapter-peer", "Sets peer for OFTAdapter contract").setAction(
       console.log("Setting OFTAdapter peer with account:", deployer.address);
 
       // Get contract instance
-      const MyOFTAdapter = await hre.ethers.getContractFactory("MyOFTAdapter");
-      const oftAdapter = MyOFTAdapter.attach(sepoliaContracts.oftAdapter);
+      const oftAdapter = (await hre.ethers.getContractAt("MyOFTAdapter", sepoliaContracts.oftAdapter)) as MyOFTAdapter;
 
       // Get Etherlink's EID
       const etherlinkEid = getLzChainId(NETWORK_NAMES.ETHERLINK);
@@ -59,7 +59,7 @@ task("set-oftadapter-peer", "Sets peer for OFTAdapter contract").setAction(
       const receipt = await tx.wait();
 
       console.log("\nPeer setup completed successfully");
-      console.log("Transaction hash:", receipt.hash);
+      console.log("Transaction hash:", receipt?.hash);
 
       console.log("\nIMPORTANT: Make sure to also run set-oft-peer on Etherlink network");
       console.log("npx hardhat set-oft-peer --network etherlink");
