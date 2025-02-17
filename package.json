@@ -81,6 +81,7 @@
   "dependencies": {
     "@layerzerolabs/lz-v2-utilities": "^3.0.67",
     "@layerzerolabs/oft-evm": "^3.1.1",
+    "@layerzerolabs/scan-client": "^0.0.8",
     "@openzeppelin/contracts": "^5.2.0"
   },
   "packageManager": "yarn@4.5.2+sha224.c2e2e9ed3cdadd6ec250589b3393f71ae56d5ec297af11cec1eba3b4"
