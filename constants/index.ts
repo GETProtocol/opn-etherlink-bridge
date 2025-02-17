@@ -13,6 +13,13 @@ export const LZ_EID = {
   "ETHERLINK-MAINNET": 30292,
 } as const;
 
+export const LZ_DVN = {
+  SEPOLIA: "0x8eebf8b423b73bfca51a1db4b7354aa0bfca9193",
+  ETHEREUM: "0x589dedbd617e0cbcb916a9223f4d1300c294236b",
+  "ETHERLINK-TESTNET": "0x4d97186cd94047e285b7cb78fa63c93e69e7aad0",
+  "ETHERLINK-MAINNET": "0xc097ab8cd7b053326dfe9fb3e3a31a0cce3b526f",
+} as const;
+
 // Chain IDs for LayerZero
 // export const LZ_CHAIN_IDS = {
 //   SEPOLIA: 40161,
