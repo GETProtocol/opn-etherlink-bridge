@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { LZ_DVN, LZ_ENDPOINTS, getLzEId, getNetworkPair, isMainnet } from "../constants";
+import { getNetworkPair, getPathwayConfig, isMainnet } from "../constants";
 
 const lzEndpointSetConfigABI = [
   {
@@ -69,21 +69,6 @@ const LZ_LIBRARIES = {
   },
 } as const;
 
-// Default configuration values
-const CONFIG = {
-  // Number of confirmations required on the source chain
-  CONFIRMATIONS: {
-    testnet: {
-      sepolia: 0, // will get deafult confirmations
-      "etherlink-testnet": 0, // will get deafult confirmations
-    },
-    mainnet: {
-      ethereum: 0, // will get deafult confirmations
-      "etherlink-mainnet": 0, // will get deafult confirmations
-    },
-  },
-} as const;
-
 interface ContractsJson {
   oft?: string;
   oftAdapter?: string;
@@ -110,6 +95,9 @@ task("set-config", "Sets LayerZero configuration for OFT or OFTAdapter contract"
         throw new Error(`OFT config must be set on ${targetNetwork} network`);
       }
 
+      // Get pathway configuration
+      const config = getPathwayConfig(network, isForOftAdapter ? targetNetwork : sourceNetwork);
+
       // Read contract addresses
       const contracts = JSON.parse(fs.readFileSync(`contracts.${network}.json`, "utf8")) as ContractsJson;
 
@@ -119,39 +107,23 @@ task("set-config", "Sets LayerZero configuration for OFT or OFTAdapter contract"
         throw new Error(`Contract not found on ${network}`);
       }
 
-      // Get the endpoint for the current chain
-      const endpoint = LZ_ENDPOINTS[mainnet ? "ETHEREUM" : "SEPOLIA"];
-
-      // Get the remote chain's endpoint ID
-      const remoteEid = getLzEId(isForOftAdapter ? targetNetwork : sourceNetwork);
-
-      // Get DVN configuration for current chain
-      const networkKey = mainnet ? "ETHEREUM" : "SEPOLIA";
-      const requiredDVNs = [LZ_DVN[networkKey]];
-      const optionalDVNs: string[] = []; // LayerZero v2 currently doesn't support optional DVNs
-
-      // Get confirmations based on network
-      const confirmations = mainnet
-        ? CONFIG.CONFIRMATIONS.mainnet[network as keyof typeof CONFIG.CONFIRMATIONS.mainnet]
-        : CONFIG.CONFIRMATIONS.testnet[network as keyof typeof CONFIG.CONFIRMATIONS.testnet];
-
       console.log("\nSetting LayerZero configuration:");
       console.log("Environment:", mainnet ? "Mainnet" : "Testnet");
       console.log("Contract:", isForOftAdapter ? "OFTAdapter" : "OFT");
       console.log("OApp address:", oAppAddress);
-      console.log("Endpoint:", endpoint);
-      console.log("Remote EID:", remoteEid);
-      console.log("Required DVNs:", requiredDVNs);
-      console.log("Confirmations:", confirmations);
+      console.log("Endpoint:", config.lzEndpointOnCurrentChain);
+      console.log("Remote EID:", config.lzEndpointIdOnRemoteChain);
+      console.log("Required DVNs:", config.requiredDVNsOnCurrentChain);
+      console.log("Confirmations:", config.confirmationsOnCurrentChain);
 
       // Create ULN config
       const ulnConfig = {
-        confirmationsOnCurrentChain: confirmations,
-        requiredDVNCount: requiredDVNs.length,
-        optionalDVNCount: optionalDVNs.length,
+        confirmationsOnCurrentChain: config.confirmationsOnCurrentChain,
+        requiredDVNCount: config.requiredDVNsOnCurrentChain.length,
+        optionalDVNCount: config.optionalDVNsOnCurrentChain.length,
         optionalDVNThreshold: 0,
-        requiredDVNsOnCurrentChain: requiredDVNs,
-        optionalDVNsOnCurrentChain: optionalDVNs,
+        requiredDVNsOnCurrentChain: config.requiredDVNsOnCurrentChain,
+        optionalDVNsOnCurrentChain: config.optionalDVNsOnCurrentChain,
       };
 
       // Encode ULN config
@@ -161,18 +133,20 @@ task("set-config", "Sets LayerZero configuration for OFT or OFTAdapter contract"
 
       // Create config parameter
       const setConfigParam = {
-        eid: remoteEid,
+        eid: config.lzEndpointIdOnRemoteChain,
         configType: 2, // CONFIG_TYPE_ULN
         config: ulnConfigEncoded,
       };
 
       // Get endpoint contract
-      const lzEndpoint = await hre.ethers.getContractAt(lzEndpointSetConfigABI, endpoint);
-
-      // Get libraries for current network
-      const libraries = LZ_LIBRARIES[networkKey];
+      const lzEndpoint = await hre.ethers.getContractAt(lzEndpointSetConfigABI, config.lzEndpointOnCurrentChain);
 
       // Set config for both send and receive libraries
+      const libraries = {
+        SEND: config.sendLibAddressOnCurrentChain,
+        RECEIVE: config.receiveLibAddressOnCurrentChain,
+      };
+
       for (const [libType, libAddress] of Object.entries(libraries)) {
         console.log(`\nSetting config for ${libType} library: ${libAddress}`);
         const tx = await lzEndpoint.setConfig(oAppAddress, libAddress, [setConfigParam]);
