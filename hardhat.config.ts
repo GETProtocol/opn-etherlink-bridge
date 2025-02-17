@@ -10,6 +10,7 @@ import "./tasks/deployOFTAdapter";
 import "./tasks/deployToken";
 import "./tasks/lock";
 import "./tasks/sendOFT";
+import "./tasks/sendOFTBack";
 import "./tasks/setConfig";
 import "./tasks/setEnforcedOptions";
 import "./tasks/setOFTAdapterPeer";
@@ -36,7 +37,7 @@ const chainIds = {
   bsc: 56,
   ganache: 1337,
   hardhat: 31337,
-  mainnet: 1,
+  ethereum: 1,
   "optimism-mainnet": 10,
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
@@ -80,12 +81,13 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_API_KEY || "",
       avalanche: process.env.SNOWTRACE_API_KEY || "",
       bsc: process.env.BSCSCAN_API_KEY || "",
-      mainnet: process.env.ETHERSCAN_API_KEY || "",
+      ethereum: process.env.ETHERSCAN_API_KEY || "",
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       sepolia: process.env.ETHERSCAN_API_KEY || "",
-      "etherlink-testnet": process.env.ETHERLINK_API_KEY || "",
+      "etherlink-testnet": process.env.ETHERLINK_API_KEY || "1", // value must not be empty
+      "etherlink-mainnet": process.env.ETHERLINK_API_KEY || "1", // value must not be empty
     },
     customChains: [
       {
@@ -129,7 +131,7 @@ const config: HardhatUserConfig = {
     arbitrum: getChainConfig("arbitrum-mainnet"),
     avalanche: getChainConfig("avalanche"),
     bsc: getChainConfig("bsc"),
-    mainnet: getChainConfig("mainnet"),
+    ethereum: getChainConfig("ethereum"),
     optimism: getChainConfig("optimism-mainnet"),
     "polygon-mainnet": getChainConfig("polygon-mainnet"),
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
