@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { NETWORK_NAMES, getLzChainId } from "../constants";
+import { NETWORK_NAMES, getLzEId, getNetworkPair, isMainnet } from "../constants";
 
 interface ContractsJson {
   oft?: string;
@@ -13,39 +13,42 @@ interface ContractsJson {
   [key: string]: string | undefined;
 }
 
-const DEFAULT_MAX_GAS = 200000; // Default max gas for executor lz receive option
+// Default gas settings - adjust these values for mainnet deployment
+const DEFAULT_GAS_SETTINGS = {
+  testnet: 200000, // Sufficient for testnet (Sepolia/Etherlink testnet)
+  mainnet: 400000, // Higher value for mainnet (Ethereum/Etherlink mainnet)
+} as const;
 
 task("set-enforced-options", "Sets enforced options for OFT or OFTAdapter contract")
   .addParam("isForOftAdapter", "Whether to set options for OFTAdapter (true) or OFT (false)")
-  .addOptionalParam("maxGas", "Max gas for executor lz receive option", DEFAULT_MAX_GAS.toString())
+  .addOptionalParam("maxGas", "Max gas for executor lz receive option", DEFAULT_GAS_SETTINGS.testnet.toString())
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
       const network = hre.network.name;
       const isForOftAdapter = taskArgs.isForOftAdapter.toLowerCase() === "true";
       const maxGas = parseInt(taskArgs.maxGas);
 
-      // Validate network and get contracts
-      if (isForOftAdapter && network !== NETWORK_NAMES.SEPOLIA) {
-        throw new Error("OFTAdapter options must be set on Sepolia network");
+      // Get network configuration
+      const mainnet = isMainnet(network);
+      const { sourceNetwork, targetNetwork } = getNetworkPair(network);
+
+      // Validate network based on contract type
+      if (isForOftAdapter && network !== sourceNetwork) {
+        throw new Error(`OFTAdapter options must be set on ${sourceNetwork} network`);
       }
-      if (!isForOftAdapter && network !== NETWORK_NAMES.ETHERLINK) {
-        throw new Error("OFT options must be set on Etherlink network");
+      if (!isForOftAdapter && network !== targetNetwork) {
+        throw new Error(`OFT options must be set on ${targetNetwork} network`);
       }
 
       // Read contract addresses from both networks
-      const sepoliaContracts = JSON.parse(
-        fs.readFileSync(`contracts.${NETWORK_NAMES.SEPOLIA}.json`, "utf8"),
-      ) as ContractsJson;
+      const sourceContracts = JSON.parse(fs.readFileSync(`contracts.${sourceNetwork}.json`, "utf8")) as ContractsJson;
+      const targetContracts = JSON.parse(fs.readFileSync(`contracts.${targetNetwork}.json`, "utf8")) as ContractsJson;
 
-      const etherlinkContracts = JSON.parse(
-        fs.readFileSync(`contracts.${NETWORK_NAMES.ETHERLINK}.json`, "utf8"),
-      ) as ContractsJson;
-
-      if (!sepoliaContracts.oftAdapter) {
-        throw new Error("OFTAdapter contract not found on Sepolia");
+      if (!sourceContracts.oftAdapter) {
+        throw new Error(`OFTAdapter contract not found on ${sourceNetwork}`);
       }
-      if (!etherlinkContracts.oft) {
-        throw new Error("OFT contract not found on Etherlink");
+      if (!targetContracts.oft) {
+        throw new Error(`OFT contract not found on ${targetNetwork}`);
       }
 
       // Get the deployer account
@@ -54,19 +57,21 @@ task("set-enforced-options", "Sets enforced options for OFT or OFTAdapter contra
 
       // Get contract instances
       const contract = isForOftAdapter
-        ? await hre.ethers.getContractAt("MyOFTAdapter", sepoliaContracts.oftAdapter)
-        : await hre.ethers.getContractAt("MyOFT", etherlinkContracts.oft);
+        ? await hre.ethers.getContractAt("MyOFTAdapter", sourceContracts.oftAdapter)
+        : await hre.ethers.getContractAt("MyOFT", targetContracts.oft);
 
       // Get remote chain's EID
-      const remoteEid = isForOftAdapter ? getLzChainId(NETWORK_NAMES.ETHERLINK) : getLzChainId(NETWORK_NAMES.SEPOLIA);
+      const remoteEid = isForOftAdapter ? getLzEId(targetNetwork) : getLzEId(sourceNetwork);
 
       console.log("\nSetting enforced options:");
+      console.log("Environment:", mainnet ? "Mainnet" : "Testnet");
       console.log("Contract:", isForOftAdapter ? "OFTAdapter" : "OFT");
-      console.log("Contract address:", isForOftAdapter ? sepoliaContracts.oftAdapter : etherlinkContracts.oft);
+      console.log("Contract address:", isForOftAdapter ? sourceContracts.oftAdapter : targetContracts.oft);
       console.log("Remote EID:", remoteEid);
       console.log("Max gas:", maxGas);
+      console.log("Network:", network);
 
-      // Create options
+      // Create options with environment-specific gas settings
       const options = Options.newOptions().addExecutorLzReceiveOption(maxGas, 0);
 
       // Create enforced options array
@@ -86,12 +91,17 @@ task("set-enforced-options", "Sets enforced options for OFT or OFTAdapter contra
       console.log("Transaction hash:", receipt?.hash);
 
       // Remind about setting options on the other chain
-      const otherNetwork = isForOftAdapter ? NETWORK_NAMES.ETHERLINK : NETWORK_NAMES.SEPOLIA;
+      const otherNetwork = isForOftAdapter ? targetNetwork : sourceNetwork;
       const otherContract = isForOftAdapter ? "OFT" : "OFTAdapter";
       console.log(`\nIMPORTANT: Make sure to also set enforced options for ${otherContract} on ${otherNetwork}`);
       console.log(
         `npx hardhat set-enforced-options --is-for-oft-adapter ${!isForOftAdapter} --network ${otherNetwork}`,
       );
+
+      if (!mainnet) {
+        console.log("\nNote: For mainnet deployment, use appropriate gas values with --max-gas parameter");
+        console.log(`Recommended mainnet gas: ${DEFAULT_GAS_SETTINGS.mainnet}`);
+      }
     } catch (error) {
       console.error("Error setting enforced options:", error);
       throw error;

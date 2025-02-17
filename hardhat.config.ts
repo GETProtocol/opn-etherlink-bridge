@@ -38,7 +38,7 @@ const chainIds = {
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
   sepolia: 11155111,
-  etherlink: 128123,
+  "etherlink-testnet": 128123,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
@@ -50,7 +50,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     case "bsc":
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
-    case "etherlink":
+    case "etherlink-testnet":
       jsonRpcUrl = "https://node.ghostnet.etherlink.com";
       break;
     default:
@@ -131,7 +131,7 @@ const config: HardhatUserConfig = {
     "polygon-mainnet": getChainConfig("polygon-mainnet"),
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
     sepolia: getChainConfig("sepolia"),
-    etherlink: getChainConfig("etherlink"),
+    "etherlink-testnet": getChainConfig("etherlink-testnet"),
   },
   paths: {
     artifacts: "./artifacts",

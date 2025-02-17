@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { NETWORK_NAMES, getLzChainId } from "../constants";
+import { NETWORK_NAMES, getLzEId, getNetworkPair, isMainnet } from "../constants";
 import { MyOFTAdapter } from "../types";
 
 interface ContractsJson {
@@ -19,50 +19,50 @@ task("set-oftadapter-peer", "Sets peer for OFTAdapter contract").setAction(
     try {
       const network = hre.network.name;
 
-      if (network !== NETWORK_NAMES.SEPOLIA) {
-        throw new Error("This task must be run on Sepolia network");
+      // Get network configuration
+      const mainnet = isMainnet(network);
+      const { sourceNetwork, targetNetwork } = getNetworkPair(network);
+
+      if (network !== sourceNetwork) {
+        throw new Error(`This task must be run on ${sourceNetwork} network`);
       }
 
       // Read contract addresses from both networks
-      const sepoliaContracts = JSON.parse(
-        fs.readFileSync(`contracts.${NETWORK_NAMES.SEPOLIA}.json`, "utf8"),
-      ) as ContractsJson;
+      const sourceContracts = JSON.parse(fs.readFileSync(`contracts.${sourceNetwork}.json`, "utf8")) as ContractsJson;
+      const targetContracts = JSON.parse(fs.readFileSync(`contracts.${targetNetwork}.json`, "utf8")) as ContractsJson;
 
-      const etherlinkContracts = JSON.parse(
-        fs.readFileSync(`contracts.${NETWORK_NAMES.ETHERLINK}.json`, "utf8"),
-      ) as ContractsJson;
-
-      if (!sepoliaContracts.oftAdapter) {
-        throw new Error("OFTAdapter contract not found on Sepolia");
+      if (!sourceContracts.oftAdapter) {
+        throw new Error(`OFTAdapter contract not found on ${sourceNetwork}`);
       }
-      if (!etherlinkContracts.oft) {
-        throw new Error("OFT contract not found on Etherlink");
+      if (!targetContracts.oft) {
+        throw new Error(`OFT contract not found on ${targetNetwork}`);
       }
 
       // Get the deployer account
       const [deployer] = await hre.ethers.getSigners();
       console.log("Setting OFTAdapter peer with account:", deployer.address);
+      console.log("Environment:", mainnet ? "Mainnet" : "Testnet");
 
       // Get contract instance
-      const oftAdapter = (await hre.ethers.getContractAt("MyOFTAdapter", sepoliaContracts.oftAdapter)) as MyOFTAdapter;
+      const oftAdapter = (await hre.ethers.getContractAt("MyOFTAdapter", sourceContracts.oftAdapter)) as MyOFTAdapter;
 
-      // Get Etherlink's EID
-      const etherlinkEid = getLzChainId(NETWORK_NAMES.ETHERLINK);
+      // Get target chain's EID
+      const targetEid = getLzEId(targetNetwork);
 
       console.log("\nSetting peer for OFTAdapter contract:");
-      console.log("OFTAdapter address:", sepoliaContracts.oftAdapter);
-      console.log("Etherlink EID:", etherlinkEid);
-      console.log("OFT address:", etherlinkContracts.oft);
+      console.log("OFTAdapter address:", sourceContracts.oftAdapter);
+      console.log(`${targetNetwork} EID:`, targetEid);
+      console.log("OFT address:", targetContracts.oft);
 
       // Set the peer
-      const tx = await oftAdapter.setPeer(etherlinkEid, zeroPad(etherlinkContracts.oft, 32));
+      const tx = await oftAdapter.setPeer(targetEid, zeroPad(targetContracts.oft, 32));
       const receipt = await tx.wait();
 
       console.log("\nPeer setup completed successfully");
       console.log("Transaction hash:", receipt?.hash);
 
-      console.log("\nIMPORTANT: Make sure to also run set-oft-peer on Etherlink network");
-      console.log("npx hardhat set-oft-peer --network etherlink");
+      console.log(`\nIMPORTANT: Make sure to also run set-oft-peer on ${targetNetwork} network`);
+      console.log(`npx hardhat set-oft-peer --network ${targetNetwork}`);
     } catch (error) {
       console.error("Error setting OFTAdapter peer:", error);
       throw error;

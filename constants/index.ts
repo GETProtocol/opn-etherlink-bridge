@@ -1,46 +1,75 @@
 export const LZ_ENDPOINTS = {
-  // Testnet endpoints
   SEPOLIA: "0x6EDCE65403992e310A62460808c4b910D972f10f",
-  ETHERLINK: "0xec28645346D781674B4272706D8a938dB2BAA2C6",
+  ETHEREUM: "0x1a44076050125825900e736c501f859c50fE728c",
+  "ETHERLINK-TESTNET": "0xec28645346D781674B4272706D8a938dB2BAA2C6",
+  "ETHERLINK-MAINNET": "0xAaB5A48CFC03Efa9cC34A2C1aAcCCB84b4b770e4",
 } as const;
 
+// E(Endpoint)IDs for LayerZero
 export const LZ_EID = {
   SEPOLIA: 40161,
-  ETHERLINK: 40239,
+  ETHEREUM: 30101,
+  "ETHERLINK-TESTNET": 40239,
+  "ETHERLINK-MAINNET": 30292,
 } as const;
 
 // Chain IDs for LayerZero
-export const LZ_CHAIN_IDS = {
-  SEPOLIA: 40161,
-  ETHERLINK: 40162,
-} as const;
+// export const LZ_CHAIN_IDS = {
+//   SEPOLIA: 40161,
+//   ETHEREUM: 1,
+//   "ETHERLINK-TESTNET": 128123,
+// } as const;
 
 // Network names as used in hardhat config
 export const NETWORK_NAMES = {
   SEPOLIA: "sepolia",
-  ETHERLINK: "etherlink",
+  ETHEREUM: "ethereum",
+  "ETHERLINK-TESTNET": "etherlink-testnet",
+  "ETHERLINK-MAINNET": "etherlink-mainnet",
 } as const;
+
+// Helper function to determine if a network is mainnet
+export function isMainnet(network: string): boolean {
+  return network === NETWORK_NAMES.ETHEREUM || network === NETWORK_NAMES["ETHERLINK-MAINNET"];
+}
+
+// Helper function to get corresponding network pair
+export function getNetworkPair(network: string): { sourceNetwork: string; targetNetwork: string } {
+  const mainnet = isMainnet(network);
+  return {
+    sourceNetwork: mainnet ? NETWORK_NAMES.ETHEREUM : NETWORK_NAMES.SEPOLIA,
+    targetNetwork: mainnet ? NETWORK_NAMES["ETHERLINK-MAINNET"] : NETWORK_NAMES["ETHERLINK-TESTNET"],
+  };
+}
 
 // Helper function to get LZ endpoint by network name
 export function getLzEndpoint(network: string): string {
   switch (network.toLowerCase()) {
+    case NETWORK_NAMES.ETHEREUM:
+      return LZ_ENDPOINTS.ETHEREUM;
     case NETWORK_NAMES.SEPOLIA:
       return LZ_ENDPOINTS.SEPOLIA;
-    case NETWORK_NAMES.ETHERLINK:
-      return LZ_ENDPOINTS.ETHERLINK;
+    case NETWORK_NAMES["ETHERLINK-TESTNET"]:
+      return LZ_ENDPOINTS["ETHERLINK-TESTNET"];
+    case NETWORK_NAMES["ETHERLINK-MAINNET"]:
+      return LZ_ENDPOINTS["ETHERLINK-MAINNET"];
     default:
       throw new Error(`No LayerZero endpoint found for network: ${network}`);
   }
 }
 
-// Helper function to get LZ chain ID by network name
-export function getLzChainId(network: string): number {
+// Helper function to get LZ  E(Endpoint)ID by network name
+export function getLzEId(network: string): number {
   switch (network.toLowerCase()) {
+    case NETWORK_NAMES.ETHEREUM:
+      return LZ_EID.ETHEREUM;
     case NETWORK_NAMES.SEPOLIA:
-      return LZ_CHAIN_IDS.SEPOLIA;
-    case NETWORK_NAMES.ETHERLINK:
-      return LZ_CHAIN_IDS.ETHERLINK;
+      return LZ_EID.SEPOLIA;
+    case NETWORK_NAMES["ETHERLINK-TESTNET"]:
+      return LZ_EID["ETHERLINK-TESTNET"];
+    case NETWORK_NAMES["ETHERLINK-MAINNET"]:
+      return LZ_EID["ETHERLINK-MAINNET"];
     default:
-      throw new Error(`No LayerZero chain ID found for network: ${network}`);
+      throw new Error(`No LayerZero EID found for network: ${network}`);
   }
 }
