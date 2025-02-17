@@ -5,7 +5,7 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { getLzEId, getNetworkPair, isMainnet } from "../constants";
+import { LZ_ERRORS, getLzEId, getNetworkPair, isMainnet } from "../constants";
 
 const OFT_CONTRACT_NAME = "MyOFT";
 
@@ -19,7 +19,7 @@ interface ContractsJson {
 // LayerZero interfaces for type safety
 interface SendParam {
   dstEid: number;
-  to: `0x${string}`;
+  to: string;
   amountLD: bigint;
   minAmountLD: bigint;
   extraOptions: string;
@@ -30,6 +30,13 @@ interface SendParam {
 interface MessagingFee {
   nativeFee: bigint;
   lzTokenFee: bigint;
+}
+
+// Helper function to decode LayerZero errors
+function decodeLzError(errorData: string): string {
+  // Extract error code (last 2 bytes)
+  const errorCode = errorData.slice(-4);
+  return LZ_ERRORS[errorCode as keyof typeof LZ_ERRORS] || `Unknown error code: ${errorCode}`;
 }
 
 task("send-oft-back", "Send OFT tokens back to source chain")
@@ -71,7 +78,11 @@ task("send-oft-back", "Send OFT tokens back to source chain")
 
       // Convert amount to wei
       const amountInWei = hre.ethers.parseEther(taskArgs.amount);
-      const receiverAddressInBytes32 = `0x${zeroPad(taskArgs.receiver, 32).slice(2)}` as `0x${string}`;
+
+      // Properly format the receiver address to bytes32
+      const receiverAddress = taskArgs.receiver.toLowerCase();
+      const paddedAddress = zeroPad(hre.ethers.getBytes(receiverAddress), 32);
+      const receiverAddressInBytes32 = hre.ethers.hexlify(paddedAddress);
 
       // Get LayerZero endpoint IDs
       const srcEid = getLzEId(sourceNetwork);
@@ -105,7 +116,26 @@ task("send-oft-back", "Send OFT tokens back to source chain")
 
       // Step 3: Quote native fee
       console.log("\nEstimating cross-chain fee...");
-      const [nativeFee] = await oft.quoteSend.staticCall(sendParam, false);
+      let nativeFee;
+      try {
+        // First try to get the quote without static call to see the revert reason
+        [nativeFee] = await oft.quoteSend(sendParam, false).catch((error: Error & { data?: string }) => {
+          // Check if we have a revert reason
+          if (error.data) {
+            const errorMessage = decodeLzError(error.data);
+            throw new Error(`Quote failed: ${errorMessage}`);
+          }
+          throw error;
+        });
+      } catch (error) {
+        console.error("Failed to get quote. Make sure you have:");
+        console.error("1. Sufficient OFT token balance");
+        console.error("2. Proper network configuration");
+        console.error("3. Valid receiver address");
+        console.error("4. Set up OFT peers using set-oft-peer and set-oftadapter-peer tasks");
+        console.error("\nError details:", error);
+        throw error;
+      }
       console.log("Estimated fee:", hre.ethers.formatEther(nativeFee), "ETH");
 
       // Step 4: Send tokens

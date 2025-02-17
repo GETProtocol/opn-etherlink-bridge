@@ -46,6 +46,22 @@ export const CHAIN_CONFIG = {
   },
 } as const;
 
+// Some LayerZero error codes
+// https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/debugging
+export const LZ_ERRORS = {
+  "0xf6ff4fb7":
+    "NoPeer: Peer is not set. Please make sure to set up the OFT peer first using set-oft-peer and set-oftadapter-peer tasks",
+  "0x91ac5e4f": "OnlyEndpoint: Invalid endpoint call",
+  "0x0fbdec0a": "InvalidEndpointCall: Invalid endpoint caller",
+  "0x9f704120": "NotEnoughNative: Insufficient native gas",
+  "0x5373352a": "LzTokenUnavailable: LayerZero token is not available",
+  "0x71c4efed": "SlippageExceeded: Token amount is outside slippage tolerance",
+  "0x1e9714b0": "InvalidLocalDecimals: Invalid token decimals",
+  "0x9a6d49cd": "InvalidOptions: Invalid options provided",
+  "0xb5863604": "InvalidDelegate: Invalid delegate address",
+  "0xc26bebcc": "OnlyPeer: Only peer can call this function",
+} as const;
+
 // Network names as used in hardhat config
 export const NETWORK_NAMES = {
   SEPOLIA: "sepolia",
