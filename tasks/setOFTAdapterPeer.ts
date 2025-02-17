@@ -3,14 +3,13 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { NETWORK_NAMES, getLzEId, getNetworkPair, isMainnet } from "../constants";
+import { getLzEId, getLzEndpoint, getNetworkPair, isMainnet } from "../constants";
 import { MyOFTAdapter } from "../types";
 
 interface ContractsJson {
   oft?: string;
   oftAdapter?: string;
   token?: string;
-  endpoint?: string;
   [key: string]: string | undefined;
 }
 
@@ -46,13 +45,15 @@ task("set-oftadapter-peer", "Sets peer for OFTAdapter contract").setAction(
       // Get contract instance
       const oftAdapter = (await hre.ethers.getContractAt("MyOFTAdapter", sourceContracts.oftAdapter)) as MyOFTAdapter;
 
-      // Get target chain's EID
+      // Get target chain's EID and endpoint
       const targetEid = getLzEId(targetNetwork);
+      const endpoint = getLzEndpoint(network);
 
       console.log("\nSetting peer for OFTAdapter contract:");
       console.log("OFTAdapter address:", sourceContracts.oftAdapter);
       console.log(`${targetNetwork} EID:`, targetEid);
       console.log("OFT address:", targetContracts.oft);
+      console.log("LayerZero Endpoint:", endpoint);
 
       // Set the peer
       const tx = await oftAdapter.setPeer(targetEid, zeroPad(targetContracts.oft, 32));
