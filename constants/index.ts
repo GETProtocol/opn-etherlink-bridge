@@ -18,8 +18,8 @@ export const CHAIN_CONFIG = {
       "0x8eebf8b423b73bfca51a1db4b7354aa0bfca9193", // LayerZero Labs
     ],
     optionalDVNsOnCurrentChain: [], // if specifying optional DVN, the setConfig tx will get reverted
-    sendLibAddressOnCurrentChain: "0x9A84c0dC1f58C75bF1db19621bbB5a1642A91217",
-    receiveLibAddressOnCurrentChain: "0x9C44Ec2656bc6D6B9E47A07ac701c61bBEF5132A",
+    sendLibAddressOnCurrentChain: "0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE",
+    receiveLibAddressOnCurrentChain: "0xdAf00F5eE2158dD58E0d3857851c432E34A3A851",
     confirmationsOnCurrentChain: 0, // will get default confirmations
   },
   "ETHERLINK-TESTNET": {
