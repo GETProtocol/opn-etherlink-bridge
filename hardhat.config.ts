@@ -8,7 +8,6 @@ import "./tasks/accounts";
 import "./tasks/deployOFT";
 import "./tasks/deployOFTAdapter";
 import "./tasks/deployToken";
-import "./tasks/lock";
 import "./tasks/sendOFT";
 import "./tasks/sendOFTBack";
 import "./tasks/setConfig";
