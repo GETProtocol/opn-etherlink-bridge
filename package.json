@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": {
     "name": "OPEN Ticketing Ecosystem",
-    "url": "https://github.com/GETProtocol"
+    "url": "https://github.com/GETProtocol/opn-etherlink-bridge"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
