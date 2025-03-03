@@ -47,6 +47,7 @@ const lzEndpointSetConfigABI = [
     type: "function",
   },
 ];
+
 interface ContractsJson {
   oft?: string;
   oftAdapter?: string;

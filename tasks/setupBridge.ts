@@ -61,7 +61,7 @@ task("setup-bridge", "Sets up and tests the OFT bridge between chains")
       // Step 5: Set enforced options
       console.log("\n=== Step 5: Setting enforced options ===");
       await hre.run("set-enforced-options", {
-        isForOftAdapter: "true",
+        isForOftAdapter: true,
       });
       console.log(`\nPlease run the following command on ${targetNetwork}:`);
       console.log(`npx hardhat set-enforced-options --network ${targetNetwork}`);
@@ -71,7 +71,7 @@ task("setup-bridge", "Sets up and tests the OFT bridge between chains")
       // Step 6: Set config
       console.log("\n=== Step 6: Setting LayerZero configuration ===");
       await hre.run("set-config", {
-        isForOftAdapter: "true",
+        isForOftAdapter: true,
       });
       console.log(`\nPlease run the following command on ${targetNetwork}:`);
       console.log(`npx hardhat set-config --network ${targetNetwork}`);
