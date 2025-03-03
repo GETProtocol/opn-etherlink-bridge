@@ -43,7 +43,9 @@
     "ts-generator": "^0.1.1",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
   },
   "files": [
     "contracts"
@@ -76,7 +78,12 @@
     "task:deployLock": "hardhat task:deployLock",
     "task:withdraw": "hardhat task:withdraw",
     "test": "hardhat test",
-    "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
+    "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"**/*.{ts,sol,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,sol,json,md}\"",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@layerzerolabs/lz-v2-utilities": "^3.0.67",
@@ -84,5 +91,15 @@
     "@layerzerolabs/scan-client": "^0.0.8",
     "@openzeppelin/contracts": "^5.2.0"
   },
-  "packageManager": "yarn@4.5.2+sha224.c2e2e9ed3cdadd6ec250589b3393f71ae56d5ec297af11cec1eba3b4"
+  "packageManager": "yarn@4.5.2+sha224.c2e2e9ed3cdadd6ec250589b3393f71ae56d5ec297af11cec1eba3b4",
+  "license": "MIT",
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,sol}": [
+      "prettier --write"
+    ]
+  }
 }
