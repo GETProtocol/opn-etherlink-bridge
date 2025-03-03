@@ -15,6 +15,7 @@ import "./tasks/setConfig";
 import "./tasks/setEnforcedOptions";
 import "./tasks/setOFTAdapterPeer";
 import "./tasks/setOFTPeer";
+import "./tasks/setupBridge";
 import "./tasks/verify";
 
 // Load environment variables from .env file

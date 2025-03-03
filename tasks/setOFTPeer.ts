@@ -3,8 +3,8 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { getLzEId, getLzEndpoint, getNetworkPair, isMainnet } from "../constants";
 import { MyOFT } from "../types/contracts/MyOFT";
+import { getLzEId, getLzEndpoint, getNetworkPair, isMainnet } from "../utils";
 
 interface ContractsJson {
   oft?: string;

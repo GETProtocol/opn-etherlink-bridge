@@ -5,7 +5,8 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { LZ_ERRORS, getLzEId, getNetworkPair, isMainnet } from "../constants";
+import { LZ_ERRORS } from "../constants";
+import { getLzEId, getNetworkPair, isMainnet } from "../utils";
 
 const OFTAdapter_CONTRACT_NAME = "MyOFTAdapter";
 

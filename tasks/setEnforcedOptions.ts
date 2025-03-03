@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { NETWORK_NAMES, getLzEId, getNetworkPair, isMainnet } from "../constants";
+import { getLzEId, getNetworkPair, isMainnet } from "../utils";
 
 interface ContractsJson {
   oft?: string;
@@ -20,12 +20,12 @@ const DEFAULT_GAS_SETTINGS = {
 } as const;
 
 task("set-enforced-options", "Sets enforced options for OFT or OFTAdapter contract")
-  .addParam("isForOftAdapter", "Whether to set options for OFTAdapter (true) or OFT (false)")
+  .addFlag("isForOftAdapter", "Whether to set options for OFTAdapter (true) or OFT (false)")
   .addOptionalParam("maxGas", "Max gas for executor lz receive option", DEFAULT_GAS_SETTINGS.testnet.toString())
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
       const network = hre.network.name;
-      const isForOftAdapter = taskArgs.isForOftAdapter.toLowerCase() === "true";
+      const isForOftAdapter = taskArgs.isForOftAdapter;
       const maxGas = parseInt(taskArgs.maxGas);
 
       // Get network configuration

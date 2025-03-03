@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { getLzEndpoint } from "../constants";
+import { getLzEndpoint } from "../utils";
 
 interface ContractsJson {
   oft?: string;

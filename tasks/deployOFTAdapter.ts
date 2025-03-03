@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { getLzEndpoint } from "../constants";
+import { getLzEndpoint } from "../utils";
 
 task("deploy-oft-adapter", "Deploys the OFTAdapter contract")
   .addParam("token", "The ERC20 token address")
