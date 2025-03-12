@@ -10,7 +10,7 @@ task("setup-bridge", "Sets up and tests the OFT bridge between chains")
   .addParam("oftName", "OFT token name", "TestOFT")
   .addParam("oftSymbol", "OFT token symbol", "TOFT")
   .addParam("testAmount", "Amount to test bridge with", "100")
-  .addParam("receiver", "Receiver address for test transfer")
+  .addParam("receiver", "Receiver address for test transfer", "0x947226984c8008C16547c9Fe3b9EF5d84DF4Af55")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
       const network = hre.network.name;

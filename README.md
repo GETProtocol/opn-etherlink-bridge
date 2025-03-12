@@ -1,206 +1,218 @@
-# Hardhat Template [![Open in Gitpod][gitpod-badge]][gitpod] [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat] [![License: MIT][license-badge]][license]
+# OPN Etherlink Bridge
 
-[gitpod]: https://gitpod.io/#https://github.com/paulrberg/hardhat-template
-[gitpod-badge]: https://img.shields.io/badge/Gitpod-Open%20in%20Gitpod-FFB45B?logo=gitpod
-[gha]: https://github.com/paulrberg/hardhat-template/actions
-[gha-badge]: https://github.com/paulrberg/hardhat-template/actions/workflows/ci.yml/badge.svg
-[hardhat]: https://hardhat.org/
-[hardhat-badge]: https://img.shields.io/badge/Built%20with-Hardhat-FFDB1C.svg
+[![Github Actions][gha-badge]][gha] [![License: MIT][license-badge]][license]
+
+[gha]: https://github.com/GETProtocol/opn-etherlink-bridge/actions
+[gha-badge]: https://github.com/GETProtocol/opn-etherlink-bridge/actions/workflows/lint.yml/badge.svg
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
-A Hardhat-based template for developing Solidity smart contracts, with sensible defaults.
-
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile, run and test smart contracts
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript bindings for smart contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet implementation
-- [Solhint](https://github.com/protofire/solhint): code linter
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
-
-## Getting Started
-
-Click the [`Use this template`](https://github.com/paulrberg/hardhat-template/generate) button at the top of the page to
-create a new repository with this repo as the initial state.
+A bridge implementation for the OPEN Ticketing Ecosystem using LayerZero's Omni Fungible Token (OFT) standard to enable
+cross-chain token transfers between Ethereum (and testnets) and the Etherlink blockchain.
 
 ## Features
 
-This template builds upon the frameworks and libraries mentioned above, so for details about their specific features,
-please consult their respective documentations.
+- Cross-chain token bridging using LayerZero v2 protocol
+- Support for both mainnet and testnet environments
+- Automated deployment and configuration scripts
+- Comprehensive testing and verification tools
+- TypeScript/Hardhat development environment
+- Linting and code formatting enforcement
+- GitHub Actions CI/CD pipeline
 
-For example, for Hardhat, you can refer to the [Hardhat Tutorial](https://hardhat.org/tutorial) and the
-[Hardhat Docs](https://hardhat.org/docs). You might be in particular interested in reading the
-[Testing Contracts](https://hardhat.org/tutorial/testing-contracts) section.
+## Prerequisites
 
-### Sensible Defaults
+Before you begin, ensure you have the following installed:
 
-This template comes with sensible default configurations in the following files:
+- [Bun](https://bun.sh/) (Package manager and runtime)
+- [Node.js](https://nodejs.org/) v18 or later
+- [Git](https://git-scm.com/)
 
-```text
-├── .editorconfig
-├── .eslintignore
-├── .eslintrc.yml
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solcover.js
-├── .solhint.json
-└── hardhat.config.ts
+## Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/GETProtocol/opn-etherlink-bridge.git
+   cd opn-etherlink-bridge
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   bun install
+   ```
+
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and add your:
+   - `MNEMONIC`: Your wallet's mnemonic phrase
+   - `INFURA_API_KEY`: API key for Infura
+   - `ETHERSCAN_API_KEY`: API key for Etherscan verification
+
+## Bridge Setup
+
+The bridge consists of three main components:
+
+1. ERC20 Token (source chain)
+2. OFTAdapter (source chain)
+3. OFT Token (destination chain)
+
+### Quick Setup
+
+Use the automated setup script to deploy and configure all components:
+
+```bash
+# On source chain (e.g., Sepolia)
+npx hardhat setup-bridge \
+  --token-name "TestOPN" \
+  --token-symbol "TSTOPN" \
+  --token-supply "2200000" \
+  --oft-name "TestOFT" \
+  --oft-symbol "TOFT" \
+  --test-amount "100" \
+  --receiver "YOUR_ADDRESS" \
+  --network sepolia
 ```
 
-### VSCode Integration
+### Manual Setup
 
-This template is IDE agnostic, but for the best user experience, you may want to use it in VSCode alongside Nomic
-Foundation's [Solidity extension](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity).
+If you prefer to set up components individually:
 
-### GitHub Actions
+1. Deploy Token (source chain):
 
-This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
-request made to the `main` branch.
+   ```bash
+   npx hardhat deploy-token \
+     --name "TestOPN" \
+     --symbol "TSTOPN" \
+     --supply "2200000" \
+     --network sepolia
+   ```
 
-Note though that to make this work, you must use your `INFURA_API_KEY` and your `MNEMONIC` as GitHub secrets.
+2. Deploy OFTAdapter (source chain):
 
-For more information on how to set up GitHub secrets, check out the
-[docs](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+   ```bash
+   npx hardhat deploy-oft-adapter \
+     --token "TOKEN_ADDRESS" \
+     --network sepolia
+   ```
 
-You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
+3. Deploy OFT (destination chain):
+
+   ```bash
+   npx hardhat deploy-oft \
+     --name "TestOFT" \
+     --symbol "TOFT" \
+     --network etherlink-testnet
+   ```
+
+4. Set up peers:
+
+   ```bash
+   # On source chain
+   npx hardhat set-oftadapter-peer --network sepolia
+
+   # On destination chain
+   npx hardhat set-oft-peer --network etherlink-testnet
+   ```
+
+5. Configure options and settings:
+
+   ```bash
+   # On source chain
+   npx hardhat set-enforced-options --is-for-oft-adapter true --network sepolia
+   npx hardhat set-config --is-for-oft-adapter true --network sepolia
+
+   # On destination chain
+   npx hardhat set-enforced-options --network etherlink-testnet
+   npx hardhat set-config --network etherlink-testnet
+   ```
 
 ## Usage
 
-### Pre Requisites
+### Sending Tokens Cross-Chain
 
-First, you need to install the dependencies:
+1. From source to destination chain:
 
-```sh
-bun install
-```
+   ```bash
+   npx hardhat send-oft \
+     --amount "100" \
+     --receiver "RECEIVER_ADDRESS" \
+     --network sepolia
+   ```
 
-Then, you need to set up all the required
-[Hardhat Configuration Variables](https://hardhat.org/hardhat-runner/docs/guides/configuration-variables). You might
-also want to install some that are optional.
+2. From destination back to source chain:
+   ```bash
+   npx hardhat send-oft-back \
+     --amount "100" \
+     --receiver "RECEIVER_ADDRESS" \
+     --network etherlink-testnet
+   ```
 
-To assist with the setup process, run `bunx hardhat vars setup`. To set a particular value, such as a BIP-39 mnemonic
-variable, execute this:
+### Additional Options
 
-```sh
-bunx hardhat vars set MNEMONIC
-? Enter value: ‣ here is where your twelve words mnemonic should be put my friend
-```
+- `--gas-drop`: Amount of native gas to drop on destination chain (in wei)
+- `--max-gas`: Maximum gas for executor LayerZero receive option
 
-If you do not already have a mnemonic, you can generate one using this [website](https://iancoleman.io/bip39/).
+## Development
 
-### Compile
+### Available Scripts
 
-Compile the smart contracts with Hardhat:
+- `bun run compile`: Compile contracts
+- `bun run test`: Run tests
+- `bun run lint`: Run all linters
+- `bun run lint:fix`: Fix linting issues
+- `bun run format`: Format code
+- `bun run typecheck`: Check TypeScript types
+- `bun run coverage`: Generate test coverage report
+- `bun run clean`: Clean build artifacts
 
-```sh
-bun run compile
-```
+### Code Quality
 
-### TypeChain
+The repository uses:
 
-Compile the smart contracts and generate TypeChain bindings:
+- ESLint for TypeScript linting
+- Prettier for code formatting
+- Solhint for Solidity linting
+- Husky for git hooks
+- lint-staged for pre-commit checks
 
-```sh
-bun run typechain
-```
+### Networks
 
-### Test
+Supported networks:
 
-Run the tests with Hardhat:
+- Ethereum Mainnet
+- Sepolia Testnet
+- Etherlink Mainnet
+- Etherlink Testnet
 
-```sh
-bun run test
-```
+Configure additional networks in `hardhat.config.ts`.
 
-### Lint Solidity
+## Error Handling
 
-Lint the Solidity code:
+Common LayerZero error codes:
 
-```sh
-bun run lint:sol
-```
+- `0xf6ff4fb7`: Peer not set
+- `0x91ac5e4f`: Invalid endpoint call
+- `0x0fbdec0a`: Invalid endpoint caller
+- `0x9f704120`: Insufficient native gas
+- `0x5373352a`: LayerZero token unavailable
+- `0x71c4efed`: Slippage exceeded
+- `0x1e9714b0`: Invalid local decimals
+- `0x9a6d49cd`: Invalid options
+- `0xb5863604`: Invalid delegate
+- `0xc26bebcc`: Only peer can call this function
 
-### Lint TypeScript
+## Contributing
 
-Lint the TypeScript code:
-
-```sh
-bun run lint:ts
-```
-
-### Coverage
-
-Generate the code coverage report:
-
-```sh
-bun run coverage
-```
-
-### Report Gas
-
-See the gas usage per unit test and average gas per method call:
-
-```sh
-REPORT_GAS=true bun run test
-```
-
-### Clean
-
-Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
-
-```sh
-bun run clean
-```
-
-### Deploy
-
-Deploy the contracts to Hardhat Network:
-
-```sh
-bun run deploy:contracts
-```
-
-### Tasks
-
-#### Deploy Lock
-
-Deploy a new instance of the Lock contract via a task:
-
-```sh
-bun run task:deployLock --unlock 100 --value 0.1
-```
-
-### Syntax Highlighting
-
-If you use VSCode, you can get Solidity syntax highlighting with the
-[hardhat-solidity](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity) extension.
-
-## Using GitPod
-
-[GitPod](https://www.gitpod.io/) is an open-source developer platform for remote development.
-
-To view the coverage report generated by `bun run coverage`, just click `Go Live` from the status bar to turn the server
-on/off.
-
-## Local development with Ganache
-
-### Install Ganache
-
-```sh
-npm i -g ganache
-```
-
-### Run a Development Blockchain
-
-```sh
-ganache -s test
-```
-
-> The `-s test` passes a seed to the local chain and makes it deterministic
-
-Make sure to set the mnemonic in your `.env` file to that of the instance running with Ganache.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
 
 ## License
 
-This project is licensed under MIT.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

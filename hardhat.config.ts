@@ -57,6 +57,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     case "etherlink-testnet":
       jsonRpcUrl = "https://node.ghostnet.etherlink.com";
       break;
+    case "sepolia":
+      jsonRpcUrl = "https://rpc.ankr.com/eth_sepolia";
+      break;
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + INFURA_API_KEY;
   }
@@ -110,9 +113,15 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: "USD",
-    enabled: process.env.REPORT_GAS ? true : false,
+    enabled: true,
     excludeContracts: [],
     src: "./contracts",
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    token: "ETH",
+    gasPriceApi: "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice",
+    showTimeSpent: true,
+    showMethodSig: true,
+    noColors: true,
   },
   networks: {
     hardhat: {
