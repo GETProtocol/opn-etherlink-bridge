@@ -7,6 +7,7 @@ export function isMainnet(network: string): boolean {
 
 // Helper function to get corresponding network pair
 export function getNetworkPair(network: string): { sourceNetwork: string; targetNetwork: string } {
+  if (network === "ganache") return getNetworkPair("ethereum");
   const mainnet = isMainnet(network);
   return {
     sourceNetwork: mainnet ? NETWORK_NAMES.ETHEREUM : NETWORK_NAMES.SEPOLIA,
@@ -16,6 +17,7 @@ export function getNetworkPair(network: string): { sourceNetwork: string; target
 
 // Helper function to get LZ endpoint by network name
 export function getLzEndpoint(network: string): string {
+  if (network === "ganache") return getLzEndpoint("ethereum");
   const key = Object.entries(NETWORK_NAMES).find(([_, value]) => value === network)?.[0];
   if (!key || !CHAIN_CONFIG[key as keyof typeof CHAIN_CONFIG]) {
     throw new Error(`No LayerZero endpoint found for network: ${network}`);
@@ -25,6 +27,7 @@ export function getLzEndpoint(network: string): string {
 
 // Helper function to get LZ EID by network name
 export function getLzEId(network: string): number {
+  if (network === "ganache") return getLzEId("ethereum");
   const key = Object.entries(NETWORK_NAMES).find(([_, value]) => value === network)?.[0];
   if (!key || !CHAIN_CONFIG[key as keyof typeof CHAIN_CONFIG]) {
     throw new Error(`No LayerZero EID found for network: ${network}`);
@@ -34,6 +37,8 @@ export function getLzEId(network: string): number {
 
 // Helper function to get pathway configuration
 export function getPathwayConfig(srcNetwork: string, destNetwork: string) {
+  if (srcNetwork === "ganache") return getPathwayConfig("ethereum", destNetwork);
+  if (destNetwork === "ganache") return getPathwayConfig(srcNetwork, "ethereum");
   const srcKey = Object.entries(NETWORK_NAMES).find(([_, value]) => value === srcNetwork)?.[0];
   const destKey = Object.entries(NETWORK_NAMES).find(([_, value]) => value === destNetwork)?.[0];
 

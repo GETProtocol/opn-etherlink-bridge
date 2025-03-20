@@ -22,7 +22,7 @@ task("set-oftadapter-peer", "Sets peer for OFTAdapter contract").setAction(
       const mainnet = isMainnet(network);
       const { sourceNetwork, targetNetwork } = getNetworkPair(network);
 
-      if (network !== sourceNetwork) {
+      if (network !== sourceNetwork && network != "ganache") {
         throw new Error(`This task must be run on ${sourceNetwork} network`);
       }
 

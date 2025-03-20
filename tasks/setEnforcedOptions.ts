@@ -24,7 +24,7 @@ task("set-enforced-options", "Sets enforced options for OFT or OFTAdapter contra
   .addOptionalParam("maxGas", "Max gas for executor lz receive option", DEFAULT_GAS_SETTINGS.testnet.toString())
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
-      const network = hre.network.name;
+      const network = hre.network.name === "ganache" ? "ethereum" : hre.network.name;
       const isForOftAdapter = taskArgs.isForOftAdapter;
       const maxGas = parseInt(taskArgs.maxGas);
 

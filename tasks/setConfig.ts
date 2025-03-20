@@ -59,7 +59,7 @@ task("set-config", "Sets LayerZero configuration for OFT or OFTAdapter contract"
   .addFlag("isForOftAdapter", "Whether to set config for OFTAdapter (true) or OFT (false)")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
-      const network = hre.network.name;
+      const network = hre.network.name === "ganache" ? "ethereum" : hre.network.name;
       const isForOftAdapter = taskArgs.isForOftAdapter;
 
       // Get network configuration

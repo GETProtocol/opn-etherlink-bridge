@@ -35,7 +35,7 @@ const chainIds = {
   "arbitrum-mainnet": 42161,
   avalanche: 43114,
   bsc: 56,
-  ganache: 1337,
+  ganache: 1,
   hardhat: 31337,
   ethereum: 1,
   "optimism-mainnet": 10,
@@ -43,11 +43,15 @@ const chainIds = {
   "polygon-mumbai": 80001,
   sepolia: 11155111,
   "etherlink-testnet": 128123,
+  "etherlink-mainnet": 42793,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
   let jsonRpcUrl: string;
   switch (chain) {
+    case "ethereum":
+      jsonRpcUrl = "https://eth.llamarpc.com";
+      break;
     case "avalanche":
       jsonRpcUrl = "https://api.avax.network/ext/bc/C/rpc";
       break;
@@ -56,6 +60,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
     case "etherlink-testnet":
       jsonRpcUrl = "https://node.ghostnet.etherlink.com";
+      break;
+    case "etherlink-mainnet":
+      jsonRpcUrl = "https://node.mainnet.etherlink.com";
       break;
     case "sepolia":
       jsonRpcUrl = "https://rpc.ankr.com/eth_sepolia";
@@ -146,6 +153,7 @@ const config: HardhatUserConfig = {
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
     sepolia: getChainConfig("sepolia"),
     "etherlink-testnet": getChainConfig("etherlink-testnet"),
+    "etherlink-mainnet": getChainConfig("etherlink-mainnet"),
   },
   paths: {
     artifacts: "./artifacts",
