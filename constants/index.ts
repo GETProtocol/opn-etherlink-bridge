@@ -41,7 +41,7 @@ export const CHAIN_CONFIG = {
     ],
     optionalDVNsOnCurrentChain: [], // if specifying optional DVN, the setConfig tx will get reverted
     sendLibAddressOnCurrentChain: "0xc1B621b18187F74c8F6D52a6F709Dd2780C09821",
-    receiveLibAddressOnCurrentChain: "0x2072a32Df77bAE5713853d666f26bA5e47E54717",
+    receiveLibAddressOnCurrentChain: "0x377530cdA84DFb2673bF4d145DCF0C4D7fdcB5b6",
     confirmationsOnCurrentChain: 0, // will get default confirmations
   },
 } as const;
