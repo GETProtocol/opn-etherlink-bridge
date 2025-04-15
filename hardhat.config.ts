@@ -21,9 +21,10 @@ import "./tasks/verify";
 dotenv.config();
 
 // Check for required environment variables
-const MNEMONIC = process.env.MNEMONIC;
+let MNEMONIC = process.env.MNEMONIC;
 if (!MNEMONIC) {
-  throw new Error("Please set your MNEMONIC in a .env file");
+  console.warn("Please set your MNEMONIC in a .env file, using default value");
+  MNEMONIC = "test test test test test test test test test test test junk";
 }
 
 const INFURA_API_KEY = process.env.INFURA_API_KEY || "";

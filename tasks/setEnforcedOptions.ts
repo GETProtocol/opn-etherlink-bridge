@@ -21,7 +21,7 @@ const DEFAULT_GAS_SETTINGS = {
 
 task("set-enforced-options", "Sets enforced options for OFT or OFTAdapter contract")
   .addFlag("isForOftAdapter", "Whether to set options for OFTAdapter (true) or OFT (false)")
-  .addOptionalParam("maxGas", "Max gas for executor lz receive option", DEFAULT_GAS_SETTINGS.testnet.toString())
+  .addOptionalParam("maxGas", "Max gas for executor lz receive option", DEFAULT_GAS_SETTINGS.mainnet.toString())
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     try {
       const network = hre.network.name === "ganache" ? "ethereum" : hre.network.name;
